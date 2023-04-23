@@ -1,5 +1,5 @@
 # project specific
-
+certs/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
