@@ -5,20 +5,35 @@ import app.parsing as parsing
 import app.config as config
 
 import dorstorder.parse
+from dorstorder.print import DorstFormat
+
 
 def handle_request(request: str) -> str:
-    parsed_req = parsing.parse_xml(request)
-    if parsed_req.empty:
+    recieved_eposdoc = parsing.parse_xml(request)
+    if recieved_eposdoc.empty:  # empty doc -> empty response and no action
         return Response().to_str()
 
-    print(repr(parsed_req.document))
-    dorstorder.parse.epos_to_order(parsed_req.document)
-    # Test if in and output are the same
-    if True:
-        return parsed_req.document.body_to_str(url_encode_newlines=True)
+    # Generate an order object from the recived eposdoc
+    order = dorstorder.parse.epos_to_order(recieved_eposdoc.document)
+
+    generated_eposdoc = DorstFormat(order).print()
+    if recieved_eposdoc.document == generated_eposdoc:
+        print('Recievend and generated match')
+    else:
+        for orig, new in zip(recieved_eposdoc.document.body, generated_eposdoc.body):
+            if orig != new:
+                print('ERROR: following elements do not match:')
+                print(repr(orig))
+                print(repr(new))
 
     printer = Printer(config.printer_ip)
-    response = printer.print(parsed_req.document, autocut=False)
+    # print orignal
+    # response = printer.print(recieved_eposdoc.document, autocut=False)
+
+    # print modified order
+    # response = printer.print(generated_eposdoc, autocut=False)
+    # print(f'{response=}')
+
 
     return Response().to_str()
 

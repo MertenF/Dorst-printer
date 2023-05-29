@@ -37,7 +37,7 @@ def epos_to_order(doc: EposDocument) -> Order:
 
         order.items.append(item)
 
-    print(order)
+    # print(order)
     return order
 
 
@@ -126,14 +126,14 @@ def create_order_metadata(header, footer) -> Order:
     order = Order()
 
     header_data = match_header(header)
-    footer_data = match_footer(footer)
-
     order.table_name = header_data[0]
     order.payment_status = header_data[1]
     order.order_num = header_data[2]
     order.payment_method = header_data[3]
     order.customer_name = header_data[4]
     order.prepare_location = header_data[5]
+
+    footer_data = match_footer(footer)
     order.total_price = footer_data[0]
     order.total_items_amount = footer_data[1]
     order.order_datetime = footer_data[2]

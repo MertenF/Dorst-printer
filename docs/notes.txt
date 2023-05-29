@@ -1,0 +1,51 @@
+Samenvatting dorst XML:
+text smooth
+text width=2 height2
+text TAFELUMMER(NAAM)
+feed 15
+text BETAALSTATUS (Niet betaald/betaald)
+text x=456
+text #BESTELNUMMER\n
+feed 15
+text width=1 height = 1
+text reverse=false ul=false em=true
+text BETAALWIJZE (Betalen bij ober/bancontact/payconiq)
+text PRINTERNAAM (Test via printer op localhost)
+text
+text \n
+text reverse=false ul=false um=false
+feed 49
+text width=2 height=2
+text BEREIDINGSLOCATIE (Doorgeef restaurant)
+feed 49
+text width=1 height=1
+feed 20
+image width=576 height=34
+feed 20
+width=1 height=1
+text align left
+START ITEM (48 char + \n)
+    text AANTAL '2x  ' (4)
+    text reverse=false ul=false em=true
+    text NAAM 'Mosselen friet                       ' (37)
+    text reverse=false ul=false em=false
+    text PRIJS '  48,00\n' (7 + \n)
+    START SUBITEM (optioneel)
+        text '    Mosselsaus                           \n' (4 + 37 + \n)
+        feed 10
+feed 20
+image width=576 heigt=34
+feed 20
+text reverse=false ul=false em=false
+feed 20
+feed 10
+text '    TOTAAL                               ' (4 + 37)
+text PRIJS_TOTAAL ' 219,00' (7 + \n)
+feed 20
+image width=576 height=34
+feed 20
+text width=1 heigth=1
+text AANTAL_TOTAAL 'Totaal aantal stuks:24\n'
+text BESTELTIJD 'Besteld op 10/10/2022 om 22:26\n'
+feed 40
+cut
