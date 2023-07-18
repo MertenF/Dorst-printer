@@ -1,11 +1,7 @@
 from flask import request, Response
 
 from app import app, config, main
-
-
-@app.route('/')
-def hello_world():
-    return 'Nothing to see here'
+import logging
 
 
 @app.route('/cgi-bin/epos/service.cgi', methods=['POST', 'GET'])
@@ -19,3 +15,27 @@ def main():
     print('Data END')
     return_data = main.handle_request(request.data.decode('utf-8'))
     return Response(return_data, mimetype='text/xml')
+
+
+
+@app.route('/')
+def hello_world():
+    return 'Nothing to see here'
+
+@app.route('/error')
+def error():
+    s = 'This is an error message'
+    logging.error(s)
+    return s
+
+@app.route('/warning')
+def warning():
+    s = 'This is a warning message'
+    logging.warning(s)
+    return s
+
+@app.route('/info')
+def info():
+    s = 'This is an info message'
+    logging.info(s)
+    return s
