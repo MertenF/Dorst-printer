@@ -10,7 +10,7 @@ from epos.elements import *
 class ParseResult:
     empty: bool = False
     parameters: dict = field(default_factory=dict)
-    document = EposDocument = None
+    document: EposDocument = None
 
 
 def parse_xml(data: str) -> ParseResult:
