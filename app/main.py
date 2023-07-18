@@ -1,4 +1,4 @@
-from epos.elements import Response
+from epos.document import EposDocument
 from epos.printer import Printer
 
 import app.parsing as parsing
@@ -10,33 +10,35 @@ from dorstorder.print import DorstFormat, ScoutsFormat
 
 def handle_request(request: str) -> str:
     recieved_eposdoc = parsing.parse_xml(request)
-    if recieved_eposdoc.empty:  # empty doc -> empty response and no action
-        return Response().to_str()
+    printer = Printer(config.printer_ip)
+
+    if recieved_eposdoc.empty:  # empty doc -> send empty doc to and return status to dorst
+        return printer.print_empty().to_str()
 
     # Generate an order object from the recived eposdoc
     order = dorstorder.parse.epos_to_order(recieved_eposdoc.document)
+    generated_eposdoc = ScoutsFormat(order).generate()
 
-    generated_eposdoc = ScoutsFormat(order).print()
-    if recieved_eposdoc.document == generated_eposdoc:
-        print('Recievend and generated match')
-    else:
-        for orig, new in zip(recieved_eposdoc.document.body, generated_eposdoc.body):
-            if orig != new:
-                #print('ERROR: following elements do not match:')
-                #print(repr(orig))
-                #print(repr(new))
-                pass
 
-    printer = Printer(config.printer_ip)
     # print orignal
     # response = printer.print(recieved_eposdoc.document, autocut=False)
 
-    # print modified order
+    # Send modified order to printer
     response = printer.print(generated_eposdoc, autocut=False)
     # print(f'{response=}')
 
+    return response.to_str()
 
-    return Response().to_str()
+
+def compare_format(doc1: EposDocument, doc2: EposDocument) -> bool:
+    if doc1 == doc2:
+        print('Both documents are the same!')
+        return True
+
+    for elem1, elem2 in zip(doc1.body, doc2.body):
+        if elem1 != elem2:
+            print(f'ERROR: Following elements do not match: {repr(elem1)} =/= {repr(elem2)}')
+    return False
 
 
 if __name__ == '__main__':

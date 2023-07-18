@@ -12,8 +12,8 @@ from epos.elements import *
 class BaseFormat(ABC):
     def __init__(self, order: Order):
         self.order = order
-    
-    def print(self) -> EposDocument:
+
+    def generate(self) -> EposDocument:
         doc = EposDocument()
 
         doc.body.extend(self.header())
@@ -135,7 +135,7 @@ class ScoutsFormat(BaseFormat):
     )
     max_len = 41 # max char width
     max_len2 = 20 # max char with double size
-    
+
     sort_weight = {
         'mosselen': 100,
         'scoutsbootje': 200,
@@ -150,7 +150,7 @@ class ScoutsFormat(BaseFormat):
         'mayonaise': 1020,
         'ketchup': 1030,
     }
-    
+
     def __init__(self, *args, **kwargs):
         self.saus_ordered = False
         self.items_printed = ['Mosselsaus', 'Mayonaise', 'Ketchup']
