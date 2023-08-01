@@ -1,5 +1,4 @@
 from typing import Type
-from decimal import Decimal
 from datetime import datetime
 
 from .order import Order, Item
@@ -64,7 +63,7 @@ def match_header(header: list[Type[BaseElement]]):
             Text(width=1, height=1),
             Text(reverse=False, underline=False, bold=True),
             Text(text=payment_method),  # Match
-            Text(text=name),  # Match
+            Text(text=customer),  # Match
             Text(),
             Text(text='\n'),
             Text(reverse=False, underline=False, bold=False),
@@ -84,7 +83,7 @@ def match_header(header: list[Type[BaseElement]]):
                 payment_status.strip(),
                 int(order_number.strip("#\n ")),  # '#1234\n'
                 payment_method.strip(),
-                name.strip(),
+                customer.strip(),
                 printer_location.strip(),
             )
         case _:
@@ -114,7 +113,7 @@ def match_footer(footer):
             Cut(),
         ]:
             return (
-                Decimal(total_price.strip().replace(',', '.')),
+                int(total_price.strip().replace(',', '.'))*100,
                 int(total_amount.replace('Totaal aantal stuks:', '').strip()),
                 datetime.strptime(order_time.strip(), 'Besteld op %d/%m/%Y om %H:%M')
             )
@@ -130,11 +129,11 @@ def create_order_metadata(header, footer) -> Order:
     order.payment_status = header_data[1]
     order.order_num = header_data[2]
     order.payment_method = header_data[3]
-    order.customer_name = header_data[4]
+    order.customer = header_data[4]
     order.prepare_location = header_data[5]
 
     footer_data = match_footer(footer)
-    order.total_price = footer_data[0]
+    order.total_price_cents = footer_data[0]
     order.total_items_amount = footer_data[1]
     order.order_datetime = footer_data[2]
 
@@ -155,7 +154,7 @@ def match_item(item):
             return Item(
                 amount=amount.strip('\n x'),
                 product_name=product.strip(),
-                price=Decimal(price.strip().replace(",", "."))
+                price_cents=int(price.strip().replace(",", "."))*100
             )
         case _:
             raise ValueError("Can't match the item")

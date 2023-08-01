@@ -44,7 +44,7 @@ class DorstFormat(BaseFormat):
         payment_status = f'{self.order.payment_status:.{max_len2}}'
         order_number = f'#{self.order.order_num}\n'
         payment_method = f'{self.order.payment_method:.{max_len}}\n'
-        name = f'{self.order.customer_name:.{max_len}}'
+        name = f'{self.order.customer:.{max_len}}'
         printer_location = f'{self.order.prepare_location:<{max_len2}.{max_len2}}'
 
         header_elements = (
@@ -77,7 +77,7 @@ class DorstFormat(BaseFormat):
         return header_elements
 
     def footer(self) -> tuple:
-        total_price = f'{self.order.total_price:>7}\n'.replace('.', ',')
+        total_price = f'{self.order.total_price_cents:>7}\n'.replace('.', ',')
         total_amount = f'Totaal aantal stuks:{self.order.total_items_amount}\n'
         order_time = f'Besteld op {self.order.order_datetime:%d/%m/%Y om %H:%M}\n'
 
@@ -177,7 +177,7 @@ class ScoutsFormat(BaseFormat):
         return header_elements
 
     def footer(self) -> tuple:
-        total_price = f'{self.order.total_price:>7}\n'.replace('.', ',')
+        total_price = f'{self.order.total_price_cents:>7}\n'.replace('.', ',')
         total_amount = f'Totaal aantal stuks:{self.order.total_items_amount}\n'
         order_time = f'Besteld op {self.order.order_datetime:%d/%m/%Y om %H:%M}\n'
 
@@ -191,7 +191,7 @@ class ScoutsFormat(BaseFormat):
             pay_meth = self.order.payment_method
         payment_method = f'{pay_meth:.{self.max_len}}\n'
 
-        name = f'{self.order.customer_name:.{self.max_len}}\n'
+        name = f'{self.order.customer:.{self.max_len}}\n'
         printer_location = f'{self.order.prepare_location:<{self.max_len2}.{self.max_len2}}\n'
 
         footer_elements = (
