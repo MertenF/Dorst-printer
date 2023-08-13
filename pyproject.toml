@@ -1,0 +1,12 @@
+[project]
+name = "dorst-printer"
+version = "1.0.0"
+description = ""
+dependencies = [
+    "flask",
+    "requests",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
