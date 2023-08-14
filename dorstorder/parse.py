@@ -9,8 +9,8 @@ from epos.elements import *
 
 def epos_to_order(doc: EposDocument) -> Order:
     # Hope syntax of Dorst stays the same
-    header = doc.body[:25]
-    body = doc.body[25:-16]
+    header = doc.body[:24]
+    body = doc.body[24:-16]
     footer = doc.body[-16:]
 
     order = create_order_metadata(header, footer)
@@ -20,6 +20,12 @@ def epos_to_order(doc: EposDocument) -> Order:
     index = 0
     print(f'{body_lenght = } elements')
     while index < body_lenght:
+        # When finding a feed tag, this means we got all items for this production location.
+        # Under this there is the 'line image' and then another feed of 20 units
+        # Following then is again a list of all the items in the order that are not needed at this production location
+        if body[index].tag == 'feed':
+            break
+
         # Items always start with text element of 4 characters: '2x  ' or '14x ' or '135x'
         # If needed the can be changed to a regex match instead of checking lenght
         if body[index].tag != 'text' or len(body[index].text) != 4:
@@ -42,12 +48,12 @@ def epos_to_order(doc: EposDocument) -> Order:
 
 def match_header(header: list[Type[BaseElement]]):
     """
-    Fetch info from the first 25 elements of a dorst order.
+    Fetch info from the first 24 elements of a dorst order.
 
     Table, payment_status, order_number, payment_method, printer_name and printer_location
     """
 
-    if len(header) != 25:
+    if len(header) != 24:
         raise ValueError(f"Found {len(header)} objects in header, 25 required")
 
     match header:
@@ -57,14 +63,14 @@ def match_header(header: list[Type[BaseElement]]):
             Text(text=table),  # Match
             Feed(unit=15),
             Text(text=payment_status),  # Match
-            Text(x=456),
+            Text(),  # 480 of 456?
             Text(text=order_number),  # Match
             Feed(unit=15),
             Text(width=1, height=1),
             Text(reverse=False, underline=False, bold=True),
             Text(text=payment_method),  # Match
             Text(text=customer),  # Match
-            Text(),
+            # Text(),  # ??
             Text(text='\n'),
             Text(reverse=False, underline=False, bold=False),
             Feed(unit=49),
@@ -113,7 +119,7 @@ def match_footer(footer):
             Cut(),
         ]:
             return (
-                int(total_price.strip().replace(',', '.'))*100,
+                int(float(total_price.strip().replace(',', '.'))*100),
                 int(total_amount.replace('Totaal aantal stuks:', '').strip()),
                 datetime.strptime(order_time.strip(), 'Besteld op %d/%m/%Y om %H:%M')
             )
@@ -154,7 +160,7 @@ def match_item(item):
             return Item(
                 amount=amount.strip('\n x'),
                 product_name=product.strip(),
-                price_cents=int(price.strip().replace(",", "."))*100
+                price_cents=int(float(price.strip().replace(",", "."))*100)
             )
         case _:
             raise ValueError("Can't match the item")
