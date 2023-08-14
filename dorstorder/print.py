@@ -3,7 +3,9 @@ from typing import Type
 from decimal import Decimal
 from datetime import datetime
 
-from .order import Order, Item
+from escpos.printer import Network
+
+from dorstorder.order import Order, Item
 
 from epos.document import EposDocument
 from epos.elements import *
@@ -111,7 +113,8 @@ class DorstFormat(BaseFormat):
         amount = f'{item.amount}x'
         amount += ' '*(4-len(amount))
         product = f'{item.product_name:<37}'
-        price = '{0:>7}\n'.format(f'{item.price:.2f}'.replace('.', ','))
+        item_price = item.price_cents/100
+        price = '{0:>7}\n'.format(f'{item_price:.2f}'.replace('.', ','))
         item_elements = [
             Text(text=amount),  # Variable
             Text(reverse=False, underline=False, bold=True),
@@ -240,7 +243,8 @@ class ScoutsFormat(BaseFormat):
         product_space = ' ' * (37-len(product))
         print(repr(product), repr(product_space))
         product_key = item.product_name.split(' ')[0]
-        price = '{0:>7}\n'.format(f'{item.price:.2f}'.replace('.', ','))
+        item_price = item.price_cents/100
+        price = '{0:>7}\n'.format(f'{item_price:.2f}'.replace('.', ','))
 
         el = []
         # line prefix
@@ -281,3 +285,82 @@ class ScoutsFormat(BaseFormat):
             el.append(Feed(unit=10))
 
         return tuple(el)
+
+
+def print_snackkot(printer: Network, order: Order):
+
+    printer.set(bold=False, custom_size=True, height=4, width=4, smooth=True, font='a')
+    printer.text(f'Order {order.order_num}\n')
+    printer.set(bold=True, custom_size=True, height=2, width=2)
+    printer.text('Orderbewijs - Klant\n')
+    printer.set(bold=False, height=1, width=1)
+    printer.text('Bij te houden tot je bestelling gemaakt is\n')
+    printer.cut()
+
+    printer.set(bold=False, custom_size=True, height=4, width=4, smooth=True, font='a')
+    printer.text(f'Order {order.order_num}\n')
+
+    printer.set(custom_size=True, height=3, width=3, smooth=True)
+    printer.text('Snackbon\n')
+
+    printer.set(height=1, width=1, smooth=True)
+    printer.text('-'*42)
+    printer.text('\n')
+
+    printer.set(bold=True)
+    for item in order.items:
+        printer.text(f'{item.amount}x')
+        printer.text(' '*(3-len(str(item.amount))))
+
+        printer.text(f'{item.product_name: <31}')
+
+        price = '{0:>7}\n'.format(f'{item.price_cents/100:.2f}'.replace('.', ','))
+        printer.text(price)
+    printer.set(height=1, width=1)
+    printer.text('-'*42)
+    printer.text('\n')
+
+
+    printer.set(bold=True, height=1, width=1)
+    printer.text('1) Geef deze bon af aan het snackkot\n')
+    printer.text('2) Wacht tot je bestelling gereed is\n')
+
+    printer.text('-' * 42)
+    printer.text('\n')
+
+    printer.set(height=1, width=1)
+    order_time = f'Besteld op {order.order_datetime:%d/%m/%Y om %H:%M}\n'
+    printer.text(order_time)
+    printer.text(f'Aantal stuks: {order.total_items_amount}\n')
+    printer.cut()
+
+
+if __name__ == '__main__':
+    ip = '10.0.0.14'
+    printer = Network(ip, timeout=6)
+    print(printer.is_online())
+    order = Order(
+        table_name='T15',
+        order_num=2000,
+        order_datetime=datetime.now(),
+        total_items_amount=5,
+        items=[
+            Item(
+                amount=1,
+                product_name='Frietjes',
+                price_cents=400,
+            ),
+            Item(
+                amount=3,
+                product_name='Curryworst',
+                price_cents=450,
+            ),
+            Item(
+                amount=1,
+                product_name='Hamburger',
+                price_cents=400,
+            ),
+        ],
+    )
+
+    print_snackkot(printer, order)
