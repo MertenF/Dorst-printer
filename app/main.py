@@ -1,3 +1,5 @@
+import logging
+
 from epos.document import EposDocument
 from epos.printer import Printer
 
@@ -16,7 +18,15 @@ def handle_request(request: str) -> str:
         return printer.print_empty().to_str()
 
     # Generate an order object from the recived eposdoc
-    order = dorstorder.parse.epos_to_order(recieved_eposdoc.document)
+    try:
+        order = dorstorder.parse.epos_to_order(recieved_eposdoc.document)
+    except Exception as e:
+        logging.warning(f'Exception occured during parsing the epos doc to an order: {e}')
+        logging.info('Sending the epos doc dirctly to printer')
+        response = printer.print(recieved_eposdoc.document, autocut=False)
+        return response.to_str()
+
+    print(order)
     generated_eposdoc = ScoutsFormat(order).generate()
 
 
