@@ -5,7 +5,7 @@ import logging
 
 
 @app.route('/cgi-bin/epos/service.cgi', methods=['POST', 'GET'])
-def main():
+def epos_service_cgi():
     if request.method == 'GET':
         return 'GET requests not supported. Use POST request with EPOS-XML'
 
