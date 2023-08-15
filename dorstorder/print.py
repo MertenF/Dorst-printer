@@ -144,6 +144,10 @@ class ScoutsFormat(BaseFormat):
         'scoutsbootje': 200,
         'balletjes': 300,
         'goulash': 400,
+        'koude': 500,
+        'kleine': 600,
+
+        'ham': 50,
 
         'friet': 10,
         'brood': 20,
@@ -181,7 +185,7 @@ class ScoutsFormat(BaseFormat):
 
     def footer(self) -> tuple:
         total_price = f'{self.order.total_price_cents:>7}\n'.replace('.', ',')
-        total_amount = f'Totaal aantal stuks:{self.order.total_items_amount}\n'
+        total_amount = f'Totaal aantal stuks:{len(self.order.items)}\n'
         order_time = f'Besteld op {self.order.order_datetime:%d/%m/%Y om %H:%M}\n'
 
         payment_status = f'{self.order.payment_status:.{self.max_len2}}'
@@ -331,8 +335,18 @@ def print_snackkot(printer: Network, order: Order):
     printer.set(height=1, width=1)
     order_time = f'Besteld op {order.order_datetime:%d/%m/%Y om %H:%M}\n'
     printer.text(order_time)
-    printer.text(f'Aantal stuks: {order.total_items_amount}\n')
+    printer.text(f'Aantal stuks: {len(order.items)}\n')
     printer.cut()
+
+
+def print_snackkot_hoera(printer: Network):
+    printer.set(bold=False, custom_size=True, height=2, width=2, smooth=True, font='a')
+    printer.text('Hoera het werkt!\n')
+    printer.set(bold=False, custom_size=True, height=1, width=1, smooth=True, font='a')
+    printer.text("""
+    Lorem Ipsum is slechts een proeftekst uit het drukkerij- en zetterijwezen. Lorem Ipsum is de standaard proeftekst in deze bedrijfstak sinds de 16e eeuw, toen een onbekende drukker een zethaak met letters nam en ze door elkaar husselde om een font-catalogus te maken. Het heeft niet alleen vijf eeuwen overleefd maar is ook, vrijwel onveranderd, overgenomen in elektronische letterzetting. Het is in de jaren '60 populair geworden met de introductie van Letraset vellen met Lorem Ipsum passages en meer recentelijk door desktop publishing software zoals Aldus PageMaker die versies van Lorem Ipsum bevatten.
+    """)
+
 
 
 if __name__ == '__main__':

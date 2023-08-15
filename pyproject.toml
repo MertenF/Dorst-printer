@@ -5,6 +5,8 @@ description = ""
 dependencies = [
     "flask",
     "requests",
+    "python-escpos",
+    "waitress",
 ]
 
 [build-system]

@@ -1,3 +1,5 @@
+import re
+
 from flask import request, Response
 
 from app import app, config, main
@@ -9,18 +11,27 @@ def epos_service_cgi():
     if request.method == 'GET':
         return 'GET requests not supported. Use POST request with EPOS-XML'
 
+    data = request.data.decode('utf-8')
+    if re.search('snacks', data, re.IGNORECASE):
+        print('snacks')
+        return_data = main.request_snackkot(data)
+    elif re.search('doorgeef', data, re.IGNORECASE):
+        print('doorgeef')
+        return_data = main.request_doorgeef(data)
+    else:
+        print('Unknown')
+        return_data = main.request_unkown(data)
 
-    print('Data:')
-    print(request.data.decode('utf-8'))
-    print('Data END')
-    return_data = main.handle_request(request.data.decode('utf-8'))
+    print('RETURNING DATA')
     return Response(return_data, mimetype='text/xml')
 
 
 
 @app.route('/')
 def hello_world():
-    return 'Nothing to see here'
+    s = 'Nothing to see here\n'
+    s += request.host
+    return s
 
 @app.route('/error')
 def error():

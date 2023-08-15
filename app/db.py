@@ -48,24 +48,27 @@ def init_app(app: flask.app.Flask) -> None:
     app.cli.add_command(init_db_command)
 
 
+def query_db(query: str, args: dict = None):
+    with (db := get_db()):
+        cur = db.execute(query, args)
+        rows = cur.fetchall()
+    return rows
+
+
 def insert_order(self, order: Order) -> None:
     params = asdict(order)
-    params['customer_firstname'] = params['customer']['first']
-    params['customer_lastname'] = params['customer']['last']
-    params['customer_email'] = params['customer']['email']
 
-    with self.conn:
-        self.conn.execute(
-            """INSERT INTO orders VALUES (
-                :table_name,
-                :payment_status,
-                :order_num,
-                :payment_method,
-                :customer,
-                :prepare_location,
-                :total_price_cents,
-                :total_items_amount,
-                :order_datetime
+    query_db(
+        """INSERT INTO orders VALUES (
+            :table_name,
+            :payment_status,
+            :order_num,
+            :payment_method,
+            :customer,
+            :prepare_location,
+            :total_price_cents,
+            :total_items_amount,
+            :order_datetime
             );""",
             params
         )
